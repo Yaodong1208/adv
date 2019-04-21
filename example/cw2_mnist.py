@@ -23,6 +23,7 @@ from attacks import cw
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+np.random.seed(0)
 
 img_size = 28
 img_chan = 1
@@ -300,7 +301,7 @@ def make_cw(env, X_data, epochs=1, eps=0.1, batch_size=batch_size):
 
 print('\nTraining')
 
-train(env, X_train, y_train, X_valid, y_valid, load=False, epochs=5,
+train(env, X_train, y_train, X_valid, y_valid, load=True, epochs=5,
       name='mnist')
 
 print('\nEvaluating on clean data')
@@ -313,7 +314,13 @@ print('\nGenerating adversarial data')
 # through a smaller dataset.  We could actually find the best parameter
 # configuration on a smaller dataset, and then apply to the full dataset.
 n_sample = 128
+
+print(X_test.shape[0])
+
 ind = np.random.choice(X_test.shape[0], size=n_sample, replace=False)
+
+ind1 = ind.copy()
+
 X_test = X_test[ind]
 y_test = y_test[ind]
 
@@ -332,13 +339,27 @@ z0 = np.argmax(y_test, axis=1)
 z1 = np.argmax(y1, axis=1)
 z2 = np.argmax(y2, axis=1)
 
+print(y1.shape)
+print(z0.shape)
+
 ind = np.logical_and(z0 == z1, z1 != z2)
 # print('success: ', np.sum(ind))
 
-ind = z0 == z1
+'''ind = z0 == z1'''
+
+
 
 X_test = X_test[ind]
 X_adv = X_adv[ind]
+
+
+with open ("cw2result.txt", "a+") as file:
+    for i in range(128):
+        if ind[i] == True:
+            file.write(str(ind1[i]) + " " + str(z1[i]) + " " + str(z2[i]) + "\n")
+
+'''
+
 z1 = z1[ind]
 z2 = z2[ind]
 y2 = y2[ind]
@@ -386,3 +407,4 @@ print('\nSaving figure')
 gs.tight_layout(fig)
 os.makedirs('img', exist_ok=True)
 plt.savefig('img/cw2_mnist.png')
+'''
